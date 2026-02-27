@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://ai-backend-xyz.onrender.com';
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://ai-agent-backend-3ixe.onrender.com';
 
 export const analyzeTask = async (task: string) => {
     const response = await fetch(`${API_URL}/api/analyze`, {
