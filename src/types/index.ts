@@ -38,20 +38,6 @@ export interface Lead {
     createdAt: string;
 }
 
-// --- Settings ---
-export type SectorType = 'it_consulting' | 'real_estate' | 'healthcare' | 'finance' | 'custom';
-export type ToneOfVoice = 'formal' | 'friendly' | 'technical';
-
-export interface AppSettings {
-    sector: SectorType;
-    companyName: string;
-    hourlyRate: number;
-    currency: string;
-    toneOfVoice: ToneOfVoice;
-    apiBaseUrl: string;
-    apiKey: string;
-}
-
 // --- API Responses ---
 export interface AnalyzeResponse {
     success: boolean;

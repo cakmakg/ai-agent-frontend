@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard,
     Kanban,
-    Settings,
     Bot,
     ChevronLeft,
     ChevronRight,
@@ -14,8 +13,6 @@ interface NavItem {
     path: string;
     label: string;
     icon: React.ReactNode;
-    badge?: string;
-    disabled?: boolean;
 }
 
 export default function Sidebar() {
@@ -36,11 +33,6 @@ export default function Sidebar() {
             path: '/crm',
             label: 'CRM Board',
             icon: <Kanban className="w-5 h-5" />,
-        },
-        {
-            path: '/settings',
-            label: 'Einstellungen',
-            icon: <Settings className="w-5 h-5" />,
         },
     ], []);
 
@@ -84,20 +76,16 @@ export default function Sidebar() {
                     return (
                         <NavLink
                             key={item.path}
-                            to={item.disabled ? '#' : item.path}
-                            onClick={(e) => item.disabled && e.preventDefault()}
+                            to={item.path}
                             className={`
                 group relative flex items-center gap-3 px-3 py-3 rounded-xl
                 transition-all duration-200 text-sm font-medium
                 ${isActive
                                     ? 'bg-primary/10 text-primary border border-primary/20 shadow-[0_0_12px_rgba(0,240,255,0.15)]'
-                                    : item.disabled
-                                        ? 'text-gray-600 cursor-not-allowed'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
                                 }
               `}
                             aria-current={isActive ? 'page' : undefined}
-                            aria-disabled={item.disabled}
                         >
                             <span className={`flex-shrink-0 transition-colors ${isActive ? 'text-primary' : ''}`}>
                                 {item.icon}
@@ -110,14 +98,9 @@ export default function Sidebar() {
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -5 }}
                                         transition={{ duration: 0.15 }}
-                                        className="overflow-hidden whitespace-nowrap flex items-center gap-2"
+                                        className="overflow-hidden whitespace-nowrap"
                                     >
                                         {item.label}
-                                        {item.badge && (
-                                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-gray-500 border border-white/5 font-mono">
-                                                {item.badge}
-                                            </span>
-                                        )}
                                     </motion.span>
                                 )}
                             </AnimatePresence>

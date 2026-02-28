@@ -3,7 +3,6 @@ import App from './App';
 import DashboardPage from './pages/dashboard-page';
 import CrmPage from './pages/crm-page';
 import EditorPage from './pages/editor-page';
-import SettingsPage from './pages/settings-page';
 
 const router = createBrowserRouter([
     {
@@ -21,10 +20,6 @@ const router = createBrowserRouter([
             {
                 path: 'editor/:id',
                 element: <EditorPage />,
-            },
-            {
-                path: 'settings',
-                element: <SettingsPage />,
             },
         ],
     },
