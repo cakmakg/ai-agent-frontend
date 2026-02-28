@@ -41,8 +41,6 @@ export default function Sidebar() {
             path: '/settings',
             label: 'Einstellungen',
             icon: <Settings className="w-5 h-5" />,
-            badge: 'Faz 3',
-            disabled: true,
         },
     ], []);
 
