@@ -2,22 +2,31 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Loader2, AlertTriangle, Flame, ShieldAlert, CheckCircle } from 'lucide-react';
 import { simulateInbox } from '../services/api';
+import { useAgentTimeline } from '../hooks/use-agent-timeline';
+import AgentTimeline from './agent-timeline';
+
+import type { InboxResponse } from '../types';
 
 export default function InboxSimulatorPanel() {
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<InboxResponse | null>(null);
+    const timeline = useAgentTimeline('inbox');
 
     const handleRun = async () => {
         if (!message.trim()) return;
         setIsLoading(true);
         setResult(null);
+        timeline.startTimeline();
+
         try {
             const res = await simulateInbox(message);
+            timeline.completeAll();
             setResult(res);
         } catch (e) {
             console.error(e);
-            setResult({ status: 'ERROR', reason: 'Verbindung zum Server fehlgeschlagen. Läuft das Backend (Express)?' });
+            timeline.completeAll();
+            setResult({ success: false, status: 'ERROR', reason: 'Verbindung zum Server fehlgeschlagen. Läuft das Backend (Express)?' });
         } finally {
             setIsLoading(false);
         }
@@ -71,24 +80,10 @@ export default function InboxSimulatorPanel() {
                     </span>
                 </button>
 
+                {/* Live Agent Timeline */}
                 <AnimatePresence mode="wait">
                     {isLoading && (
-                        <motion.div
-                            key="loading"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="flex flex-col items-center justify-center py-10 rounded-xl bg-gradient-to-b from-secondary/5 to-transparent border border-dashed border-secondary/20"
-                        >
-                            <div className="relative mb-6">
-                                <div className="absolute inset-0 border-t-2 border-secondary rounded-full animate-spin"></div>
-                                <div className="absolute inset-2 border-r-2 border-primary rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '2s' }}></div>
-                                <Mail className="w-10 h-10 text-secondary p-2 animate-pulse" />
-                            </div>
-                            <p className="text-secondary font-medium animate-pulse neon-text-purple text-center tracking-wide text-sm">
-                                Agent 6 filtert und analysiert...
-                            </p>
-                        </motion.div>
+                        <AgentTimeline steps={timeline.steps} title="Posteingang Pipeline" />
                     )}
 
                     {result && !isLoading && (
@@ -105,7 +100,7 @@ export default function InboxSimulatorPanel() {
                                         <h3 className="text-base font-bold text-danger tracking-wide shadow-danger">SPAM Gefiltert - Orchestrator nicht belastet</h3>
                                     </div>
                                     <p className="text-sm text-danger/90 bg-black/40 p-3 rounded-lg border border-danger/20 font-medium">
-                                        {result.reason}
+                                        {result.reason as string}
                                     </p>
                                 </div>
                             ) : result.status === 'HOT_LEAD_PROCESSED' ? (
@@ -122,12 +117,12 @@ export default function InboxSimulatorPanel() {
                                             <div className="text-xs text-success/70 uppercase tracking-wider mb-2 font-bold flex items-center gap-2">
                                                 <CheckCircle className="w-4 h-4" /> Automatisch Generierte Aufgabe
                                             </div>
-                                            <p className="text-sm font-medium text-success/90">{result.generatedTask}</p>
+                                            <p className="text-sm font-medium text-success/90">{result.generatedTask as string}</p>
                                         </div>
 
                                         <div className="bg-black/60 border border-success/20 rounded-lg p-4 overflow-auto max-h-[200px] custom-scrollbar shadow-[inset_0_0_15px_rgba(0,0,0,0.4)]">
                                             <pre className="text-sm text-gray-300 whitespace-pre-wrap font-sans leading-relaxed">
-                                                {result.finalReport}
+                                                {result.finalReport as string}
                                             </pre>
                                         </div>
                                     </div>
@@ -135,7 +130,7 @@ export default function InboxSimulatorPanel() {
                             ) : (
                                 <div className="bg-warning/10 border border-warning/30 rounded-xl p-5 flex items-center gap-3">
                                     <AlertTriangle className="w-6 h-6 text-warning" />
-                                    <p className="text-sm text-warning font-medium">{result.reason || "Unbekannter Systemfehler."}</p>
+                                    <p className="text-sm text-warning font-medium">{(result.reason as string) || "Unbekannter Systemfehler."}</p>
                                 </div>
                             )}
                         </motion.div>

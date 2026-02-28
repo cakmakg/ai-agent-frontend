@@ -2,25 +2,32 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Loader2, CheckCircle2, Cpu } from 'lucide-react';
 import { analyzeTask } from '../services/api';
+import { useAgentTimeline } from '../hooks/use-agent-timeline';
+import AgentTimeline from './agent-timeline';
 
 export default function ManualTaskPanel() {
     const [task, setTask] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<string | null>(null);
+    const timeline = useAgentTimeline('task');
 
     const handleRun = async () => {
         if (!task.trim()) return;
         setIsLoading(true);
         setResult(null);
+        timeline.startTimeline();
+
         try {
             const res = await analyzeTask(task);
+            timeline.completeAll();
             if (res.success) {
-                setResult(res.finalReport);
+                setResult(res.finalReport ?? null);
             } else {
                 setResult(res.error || "Ein Fehler ist aufgetreten.");
             }
         } catch (e) {
             console.error(e);
+            timeline.completeAll();
             setResult("Verbindung zum Server fehlgeschlagen. Läuft das Backend (Express)?");
         } finally {
             setIsLoading(false);
@@ -75,25 +82,10 @@ export default function ManualTaskPanel() {
                     </span>
                 </button>
 
+                {/* Live Agent Timeline */}
                 <AnimatePresence mode="wait">
                     {isLoading && (
-                        <motion.div
-                            key="loading"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="flex flex-col items-center justify-center py-10 rounded-xl bg-gradient-to-b from-primary/5 to-transparent"
-                        >
-                            <div className="relative mb-6">
-                                <div className="absolute inset-0 border-t-2 border-primary rounded-full animate-spin"></div>
-                                <div className="absolute inset-2 border-r-2 border-secondary rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
-                                <div className="absolute inset-4 border-b-2 border-primary/50 rounded-full animate-spin" style={{ animationDuration: '3s' }}></div>
-                                <Cpu className="w-12 h-12 text-primary p-3 animate-pulse" />
-                            </div>
-                            <p className="text-primary font-medium animate-pulse neon-text-blue text-center text-sm tracking-wide">
-                                Agenten arbeiten, Bericht wird erstellt...
-                            </p>
-                        </motion.div>
+                        <AgentTimeline steps={timeline.steps} title="Orchestrator Pipeline" />
                     )}
 
                     {result && !isLoading && (
