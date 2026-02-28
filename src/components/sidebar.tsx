@@ -36,8 +36,6 @@ export default function Sidebar() {
             path: '/crm',
             label: 'CRM Board',
             icon: <Kanban className="w-5 h-5" />,
-            badge: 'Faz 2',
-            disabled: true,
         },
         {
             path: '/settings',
